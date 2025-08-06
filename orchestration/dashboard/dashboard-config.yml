@@ -1,0 +1,3 @@
+dashboard:
+  enabled: true
+  commands: [status, pause, resume, approve]
