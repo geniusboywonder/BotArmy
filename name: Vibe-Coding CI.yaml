@@ -1,0 +1,58 @@
+name: Vibe-Coding CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint_and_test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        agent: [analyst, architect, developer, tester]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      if: matrix.agent != 'developer'  # Assuming developer uses Node.js or another setup
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Set up Node.js
+      if: matrix.agent == 'developer'
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install dependencies
+      run: |
+        if [ "${{ matrix.agent }}" = "developer" ]; then
+          npm install
+        else
+          pip install -r requirements.txt
+        fi
+
+    - name: Run lint for ${{ matrix.agent }}
+      run: |
+        if [ "${{ matrix.agent }}" = "developer" ]; then
+          npm run lint
+        else
+          pylint ./${{ matrix.agent }}
+        fi
+
+    - name: Run tests for ${{ matrix.agent }}
+      run: |
+        if [ "${{ matrix.agent }}" = "developer" ]; then
+          npm test
+        else
+          pytest ./tests/${{ matrix.agent }}
+        fi
