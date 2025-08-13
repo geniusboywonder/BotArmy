@@ -2,7 +2,7 @@
 
 ## 1. Architecture Overview
 
-BotArmy is designed as a **Sequential Agent Orchestration System** with real-time human oversight, built for rapid POC deployment on free cloud platforms.
+BotArmy is designed as a **Sequential Agent Orchestration System** with real-time human oversight, built for rapid Proof-of-Concept (POC) deployment on free cloud platforms.
 
 ### 1.1 High-Level Architecture
 
@@ -15,6 +15,14 @@ BotArmy is designed as a **Sequential Agent Orchestration System** with real-tim
 │  │ Agent Consoles  │  │ Action Queue    │  │ Spec Viewer │ │
 │  │ (Real-time)     │  │ (Human Tasks)   │  │ (Live Doc)  │ │
 │  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
+│  │ Artifacts Page  │  │ Settings Page   │  │ Tasks Page  │ │
+│  │ (Tabbed SDLC)   │  │ (Prefs/Roles)  │  │ (Queue)     │ │
+│  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+│  ┌─────────────────┐                                        │
+│  │ Logs Page       │                                        │
+│  │ (System Events) │                                        │
+│  └─────────────────┘                                        │
 ├─────────────────────────────────────────────────────────────┤
 │  Orchestration Layer                                        │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
@@ -30,18 +38,22 @@ BotArmy is designed as a **Sequential Agent Orchestration System** with real-tim
 ├─────────────────────────────────────────────────────────────┤
 │  Persistence Layer                                          │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
-│  │ Conversation    │  │ Project Spec    │  │ Generated   │ │
-│  │ Logs (JSONL)    │  │ (JSON+History)  │  │ Artifacts   │ │
+│  │ Conversation    │  │ Project Spec    │  │ Artifacts   │ │
+│  │ Logs (JSONL)    │  │ (JSON+History)  │  │ (Files)     │ │
 │  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+│  ┌─────────────────┐                                        │
+│  │ System Logs     │                                        │
+│  │ (JSONL)         │                                        │
+│  └─────────────────┘                                        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ## 2. Technology Stack
 
 ### 2.1 Primary Platform: **GitHub Codespaces** (Recommended)
-- **Rationale**: Free tier available, persistent storage, web-based, supports full-stack development
-- **Alternative**: Replit (if GitHub Codespaces unavailable)
-- **Fallback**: Google Colab (limited web capabilities)
+- **Rationale**: Free tier available, persistent storage, web-based, supports full-stack development, and suitable for artifact hosting with hyperlink-based downloads.
+- **Alternative**: Vercel (for production-ready artifact hosting and deployment).
+- **Fallback**: Replit (if GitHub Codespaces unavailable).
 
 ### 2.2 Core Technologies
 
@@ -49,12 +61,12 @@ BotArmy is designed as a **Sequential Agent Orchestration System** with real-tim
 |-----------|------------|---------------|
 | **Frontend** | React + Vite + Tailwind CSS | Fast development, utility-first styling, minimal bundle |
 | **Backend** | FastAPI (Python) | Async support, auto-documentation, WebSocket support |
-| **Real-time Communication** | WebSockets | Live agent conversation streaming |
-| **State Management** | Zustand + React State | Simple global state, performant, TypeScript-first |
-| **Message Bus** | In-memory Queue + JSONL | Simple, observable, persistent logging |
-| **LLM Integration** | LangChain + OpenAI/Anthropic | Unified interface, easy model swapping |
-| **Data Persistence** | Pydantic Models + JSON Files + IndexedDB | Type safety, client caching |
-| **Testing** | Pytest + React Testing Library | Basic coverage for POC |
+| **Real-time Communication** | WebSockets | Live agent conversation streaming, task updates, and artifact updates |
+| **State Management** | Zustand + React State + IndexedDB | Simple global state, performant, TypeScript-first, offline caching |
+| **Message Bus** | In-memory Queue + JSONL | Simple, observable, persistent logging, artifact generation |
+| **LLM Integration** | LangChain + OpenAI/Anthropic | Unified interface, easy model swapping, fallback support |
+| **Data Persistence** | Pydantic Models + JSON Files + IndexedDB | Type safety, client caching, artifact and log storage |
+| **Testing** | Pytest + React Testing Library + Playwright | Comprehensive coverage for POC |
 
 ### 2.3 Updated File Structure
 ```
@@ -73,16 +85,38 @@ botarmy/
 │   │   │   ├── SpecViewer/
 │   │   │   │   ├── SpecViewer.jsx
 │   │   │   │   └── SpecHistory.jsx
-│   │   │   ├── Dashboard.jsx
+│   │   │   ├── Artifacts/
+│   │   │   │   ├── ArtifactsPage.jsx
+│   │   │   │   ├── ArtifactTab.jsx
+│   │   │   │   └── ArtifactTreeView.jsx
+│   │   │   ├── Settings/
+│   │   │   │   ├── SettingsPage.jsx
+│   │   │   │   ├── ThemeToggle.jsx
+│   │   │   │   └── RoleAssignmentForm.jsx
+│   │   │   ├── Tasks/
+│   │   │   │   ├── TasksPage.jsx
+│   │   │   │   └── TaskTable.jsx
+│   │   │   ├── Logs/
+│   │   │   │   ├── LogsPage.jsx
+│   │   │   │   └── LogTable.jsx
+│   │   │   ├── Dashboard/
+│   │   │   │   ├── Dashboard.jsx
+│   │   │   │   ├── CommandCenter.jsx
+│   │   │   │   ├── AgentGrid.jsx
+│   │   │   │   └── ConflictMonitoring.jsx
 │   │   │   └── Header.jsx
 │   │   ├── hooks/
 │   │   │   ├── useWebSocket.js
 │   │   │   ├── useConversations.js
-│   │   │   └── useProjectSpec.js
+│   │   │   ├── useProjectSpec.js
+│   │   │   ├── useSettings.js
+│   │   │   └── useLogs.js
 │   │   ├── stores/
 │   │   │   ├── agentStore.js
 │   │   │   ├── conversationStore.js
-│   │   │   └── specStore.js
+│   │   │   ├── specStore.js
+│   │   │   ├── settingsStore.js
+│   │   │   └── logsStore.js
 │   │   ├── types/
 │   │   │   └── index.ts
 │   │   └── App.jsx
@@ -91,7 +125,8 @@ botarmy/
 │   │   ├── base_agent.py
 │   │   ├── analyst.py
 │   │   ├── architect.py
-│   │   └── developer.py
+│   │   ├── developer.py
+│   │   └── settings.py
 │   ├── orchestration/
 │   │   ├── message_bus.py
 │   │   ├── conflict_resolver.py
@@ -99,16 +134,29 @@ botarmy/
 │   ├── models/
 │   │   ├── messages.py
 │   │   ├── project_spec.py
-│   │   └── websocket_models.py
+│   │   ├── websocket_models.py
+│   │   ├── artifacts.py
+│   │   └── logs.py
 │   ├── api/
 │   │   ├── conversations.py
 │   │   ├── projects.py
-│   │   └── websocket.py
+│   │   ├── websocket.py
+│   │   ├── artifacts.py
+│   │   ├── settings.py
+│   │   └── logs.py
 │   └── main.py
 ├── data/                       # Persistent Storage
 │   ├── conversations/
 │   ├── specs/
-│   └── artifacts/
+│   ├── artifacts/
+│   │   ├── requirements/
+│   │   ├── design/
+│   │   ├── development/
+│   │   ├── testing/
+│   │   ├── deployment/
+│   │   └── maintenance/
+│   ├── logs/
+│   └── roles/
 └── tests/
 ```
 
@@ -117,19 +165,22 @@ botarmy/
 ### 3.1 Message Bus Architecture
 
 ```python
-# Updated Message Schema
+# Message Schema
 {
     "id": "msg_001",
-    "timestamp": "2024-01-01T10:00:00Z",
+    "timestamp": "2025-08-13T19:43:00Z",
     "from_agent": "analyst",
     "to_agent": "architect",
-    "message_type": "handoff|conflict|agreement|escalation",
+    "message_type": "handoff|conflict|agreement|escalation|artifact|settings|command|start|complete|error",
     "content": {
         "text": "Primary message content",
         "metadata": {
             "requirements": {...},
             "confidence": 0.8,
-            "attachments": []
+            "attachments": [],
+            "artifact_path": "/data/artifacts/{project_id}/{phase}/{file}",
+            "settings_change": {...},
+            "task": "Task description"
         }
     },
     "attempt_number": 1,
@@ -142,14 +193,17 @@ botarmy/
 ```typescript
 // WebSocket Message Types
 interface WebSocketMessage {
-  type: 'agent_message' | 'status_update' | 'action_required' | 'spec_update';
+  type: 'agent_message' | 'status_update' | 'action_required' | 'spec_update' | 'artifact_update' | 'settings_update' | 'task_start' | 'task_complete' | 'task_error';
   timestamp: string;
   data: {
-    agentId: string;
+    agentId?: string;
     message?: AgentMessage;
     status?: AgentStatus;
     action?: HumanAction;
     specUpdate?: SpecUpdate;
+    artifact?: ArtifactUpdate;
+    settings?: SettingsUpdate;
+    task?: TaskUpdate;
   };
 }
 
@@ -160,50 +214,99 @@ interface AgentStatus {
   currentTask?: string;
   lastActivity: string;
   confidence: number;
+  queue: {
+    todo: number;
+    inProgress: number;
+    done: number;
+    failed: number;
+  };
+  performance: number;
+}
+
+// Artifact Update
+interface ArtifactUpdate {
+  projectId: string;
+  phase: 'requirements' | 'design' | 'development' | 'testing' | 'deployment' | 'maintenance';
+  artifactPath: string;
+  artifactName: string;
+  downloadUrl: string;
+}
+
+// Settings Update
+interface SettingsUpdate {
+  projectId: string;
+  theme: 'light' | 'dark';
+  notificationsEnabled: boolean;
+  roleAssignments: Record<string, string>;
+}
+
+// Task Update
+interface TaskUpdate {
+  agentId: string;
+  task: string;
+  status: 'start' | 'complete' | 'error';
+  errorMessage?: string;
 }
 ```
 
-### 3.3 Updated Conflict Resolution System
+### 3.3 Conflict Resolution System
 
 ```python
 class ConflictResolver:
     def __init__(self):
         self.max_attempts = 3
         self.timeout_seconds = 300
+        self.confidence_threshold = 0.6
         self.escalation_patterns = [
             "disagreement_loop",
-            "timeout_exceeded", 
-            "confidence_threshold_low"
+            "timeout_exceeded",
+            "confidence_threshold_low",
+            "conversation_loop"
         ]
         
     def detect_conflict(self, conversation_thread):
-        # Enhanced pattern detection
-        # Real-time confidence monitoring
-        # Automatic escalation triggers
+        if self._is_conversation_loop(conversation_thread):
+            return {"type": "conversation_loop", "details": "Detected repetitive message patterns"}
+        if conversation_thread[-1].content.confidence < self.confidence_threshold:
+            return {"type": "confidence_threshold_low", "details": f"Confidence {conversation_thread[-1].content.confidence} below {self.confidence_threshold}"}
+        if self._is_timeout_exceeded(conversation_thread):
+            return {"type": "timeout_exceeded", "details": "Response timeout after 5 minutes"}
         
     def escalate_to_human(self, conflict_context):
-        # Generate structured escalation data
         # Send via WebSocket to Action Queue
-        # Pause dependent agents automatically
+        # Update conflict monitoring section in Dashboard
+        # Log escalation event
+        set_logs(f'{{"timestamp":"{datetime.utcnow().isoformat()}","level":"warning","agent":"system","event":"escalation","message":"Conflict escalated: {conflict_context}"}}')
+        
+    def _is_conversation_loop(self, thread):
+        message_hashes = [hash(msg.content.text) for msg in thread[-5:]]
+        return len(set(message_hashes)) < len(message_hashes) * 0.5
+    
+    def _is_timeout_exceeded(self, thread):
+        last_msg_time = thread[-1].timestamp
+        return (datetime.utcnow() - last_msg_time).total_seconds() > self.timeout_seconds
 ```
 
 ### 3.4 Agent Communication Protocol
 
 **Sequential Workflow:**
 1. **Analyst** → Requirements Document → **Architect**
-2. **Architect** → Technical Specs → **Developer**  
+2. **Architect** → Technical Specs → **Developer**
 3. **Developer** → Code Artifacts → **Tester**
 4. **Tester** → Test Results → **Deployer**
+5. **Any Agent** → Artifacts → Message Bus (stored in `/data/artifacts/{phase}/`)
+6. **Product Owner** → Settings Updates → Message Bus
+7. **User** → Commands → Message Bus (routed to agents)
 
-**Enhanced Conflict Resolution Protocol:**
-1. Agent A sends message to Agent B via WebSocket
-2. Real-time status updates broadcast to UI
-3. Agent B responds with agreement/disagreement + confidence score
-4. If disagreement (confidence < 0.7), initiate negotiation
-5. Up to 3 negotiation attempts with escalating priority
-6. Unresolved conflicts trigger human action queue item
-7. Human decision updates project spec with JSON Patch operations
-8. Workflow resumes with updated context
+**Conflict Resolution Protocol:**
+1. Agent A sends message to Agent B via WebSocket.
+2. Real-time status updates broadcast to UI and Dashboard.
+3. Agent B responds with agreement/disagreement + confidence score.
+4. If disagreement (confidence < 0.6), initiate negotiation (max 3 attempts).
+5. Timeout or loop detection triggers escalation.
+6. Unresolved conflicts trigger human action queue item in Command Center chat.
+7. Human decision updates project spec with JSON Patch operations.
+8. Workflow resumes with updated context.
 
 ## 4. Frontend Architecture Details
 
@@ -221,13 +324,38 @@ const useAgentStore = create((set) => ({
   })),
 }));
 
-// Conversation Store with Caching
+// Conversation Store
 const useConversationStore = create((set, get) => ({
   conversations: new Map(),
-  messageCache: new Map(), // Last 100 messages per agent
+  messageCache: new Map(),
   loadConversation: async (agentId, cursor) => {
-    // Cursor-based pagination
-    // IndexedDB integration for offline access
+    const db = await openIndexedDB();
+    const cached = await db.get('conversations', agentId);
+  },
+}));
+
+// Settings Store
+const useSettingsStore = create((set) => ({
+  theme: 'light',
+  notificationsEnabled: true,
+  roleAssignments: {},
+  updateSettings: (settings) => set((state) => ({
+    ...state,
+    ...settings,
+  })),
+  syncToIndexedDB: async () => {
+    const db = await openIndexedDB();
+    await db.put('settings', get().settings);
+  },
+}));
+
+// Logs Store
+const useLogsStore = create((set) => ({
+  logs: [],
+  loadLogs: async (projectId, limit = 50) => {
+    const response = await fetch(`/api/projects/${projectId}/logs?limit=${limit}`);
+    const logs = await response.json();
+    set({ logs });
   },
 }));
 ```
@@ -235,25 +363,224 @@ const useConversationStore = create((set, get) => ({
 ### 4.2 Component Architecture
 
 ```jsx
-// Plugin-like Agent Console Architecture
-const AgentConsole = ({ agentType, agentConfig }) => {
-  const AgentComponent = agentRegistry[agentType] || BaseAgentConsole;
+// Dashboard Component
+const Dashboard = () => {
+  const [activeTab, setActiveTab] = useState('analyst');
+  const [isActionQueueOpen, setIsActionQueueOpen] = useState(true);
   
   return (
-    <AgentComponent
-      config={agentConfig}
-      onMessage={handleMessage}
-      onStatusChange={handleStatusChange}
-    />
+    <div className="h-screen bg-gray-50 dark:bg-slate-900 flex flex-col">
+      <Header />
+      <div className="flex-1 flex overflow-hidden">
+        <Sidebar
+          activePage={activeTab}
+          onPageChange={setActiveTab}
+          darkMode={useSettingsStore((state) => state.theme) === 'dark'}
+          toggleDarkMode={() => useSettingsStore.getState().updateSettings({ theme: useSettingsStore.getState().theme === 'dark' ? 'light' : 'dark' })}
+        />
+        <div className="flex-1 flex flex-col">
+          <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800">
+            <nav className="flex space-x-8 px-6">
+              {agents.map(agent => (
+                <TabButton 
+                  key={agent.id}
+                  agent={agent}
+                  isActive={activeTab === agent.id}
+                  onClick={() => setActiveTab(agent.id)}
+                />
+              ))}
+            </nav>
+          </div>
+          <div className="flex-1 p-6">
+            <CommandCenter />
+            <AgentGrid />
+            <ConflictMonitoring />
+          </div>
+        </div>
+        <ActionQueue 
+          isOpen={isActionQueueOpen}
+          onToggle={() => setIsActionQueueOpen(!isActionQueueOpen)}
+        />
+      </div>
+    </div>
   );
 };
 
-// Extensible Agent Registry
-const agentRegistry = {
-  'analyst': AnalystConsole,
-  'architect': ArchitectConsole,
-  'developer': DeveloperConsole,
-  'default': BaseAgentConsole
+// Command Center
+const CommandCenter = () => {
+  const [chatInput, setChatInput] = useState('');
+  const messages = useConversationStore((state) => state.conversations.get('command_center') || []);
+  
+  const handleSend = () => {
+    if (chatInput.trim()) {
+      broadcastToWebSocket({
+        type: 'agent_message',
+        timestamp: new Date().toISOString(),
+        data: {
+          message: {
+            id: `msg_${Date.now()}`,
+            from_agent: 'user',
+            to_agent: null,
+            message_type: 'command',
+            content: { text: chatInput },
+            thread_id: 'command_center',
+            attempt_number: 1
+          }
+        }
+      });
+      setChatInput('');
+    }
+  };
+  
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+      <div className="p-6">
+        <input
+          value={chatInput}
+          onChange={(e) => setChatInput(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+          className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+        />
+        <button onClick={handleSend} className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl">
+          Send
+        </button>
+      </div>
+      <div className="max-h-60 overflow-y-auto">
+        {messages.map((msg) => (
+          <div key={msg.id} className="flex items-start gap-3">
+            <span className="text-sm font-medium">{msg.from_agent === 'user' ? 'You' : 'System'}</span>
+            <p className="text-sm">{msg.content.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Agent Grid
+const AgentGrid = () => {
+  const agents = useAgentStore((state) => Object.values(state.agents));
+  
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      {agents.map((agent) => (
+        <div key={agent.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+          <div className="p-6">
+            <h4>{agent.name} ({agent.role})</h4>
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${getStatusConfig(agent.status).color}`}></div>
+              <span>{agent.status}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>Completed: {agent.queue.done}</div>
+              <div>Performance: {agent.performance}%</div>
+            </div>
+            <div className="flex gap-4">
+              <span>Todo: {agent.queue.todo}</span>
+              <span>Active: {agent.queue.inProgress}</span>
+              <span>Failed: {agent.queue.failed}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Tasks Page
+const TasksPage = () => {
+  const agents = useAgentStore((state) => Object.values(state.agents));
+  
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+      <table className="w-full">
+        <thead>
+          <tr>
+            <th>Agent</th>
+            <th>Task</th>
+            <th>Status</th>
+            <th>Todo</th>
+            <th>In Progress</th>
+            <th>Done</th>
+            <th>Failed</th>
+          </tr>
+        </thead>
+        <tbody>
+          {agents.map((agent) => (
+            <tr key={agent.id}>
+              <td>{agent.name} ({agent.role})</td>
+              <td>{agent.currentTask || '-'}</td>
+              <td>{agent.status}</td>
+              <td>{agent.queue.todo}</td>
+              <td>{agent.queue.inProgress}</td>
+              <td>{agent.queue.done}</td>
+              <td>{agent.queue.failed}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+// Logs Page
+const LogsPage = () => {
+  const logs = useLogsStore((state) => state.logs);
+  
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+      <table className="w-full">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Agent</th>
+            <th>Event</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {logs.map((log, i) => {
+            const parsed = JSON.parse(log);
+            return (
+              <tr key={i}>
+                <td>{parsed.timestamp}</td>
+                <td>{parsed.agent}</td>
+                <td>{parsed.event}</td>
+                <td>{parsed.message || parsed.task}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+// Sidebar Component
+const Sidebar = ({ activePage, onPageChange, darkMode, toggleDarkMode }) => {
+  return (
+    <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
+      <nav className="p-4">
+        {['dashboard', 'agents', 'tasks', 'logs', 'settings'].map((page) => (
+          <button
+            key={page}
+            onClick={() => onPageChange(page)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg ${activePage === page ? 'bg-blue-500 text-white' : 'text-slate-600 dark:text-slate-300'}`}
+          >
+            <Icon name={page} />
+            {page.charAt(0).toUpperCase() + page.slice(1)}
+          </button>
+        ))}
+        <button
+          onClick={toggleDarkMode}
+          className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-300"
+        >
+          {darkMode ? '☀️' : '🌙'}
+          {darkMode ? 'Light Mode' : 'Dark Mode'}
+        </button>
+      </nav>
+    </aside>
+  );
 };
 ```
 
@@ -265,9 +592,8 @@ const useOptimisticUpdates = () => {
   const [pendingUpdates, setPendingUpdates] = useState(new Map());
   
   const optimisticUpdate = (id, update) => {
-    // Apply update immediately
-    // Queue for server confirmation
-    // Rollback on failure
+    setPendingUpdates(new Map(pendingUpdates).set(id, update));
+    broadcastToWebSocket(update);
   };
   
   return { optimisticUpdate, pendingUpdates };
@@ -279,7 +605,6 @@ const useOptimisticUpdates = () => {
 ### 5.1 REST API Endpoints
 
 ```python
-# FastAPI Router Structure
 @router.get("/projects/{project_id}/conversations")
 async def get_conversations(
     project_id: str,
@@ -287,8 +612,7 @@ async def get_conversations(
     cursor: Optional[str] = None,
     limit: int = 50
 ):
-    # Cursor-based pagination
-    # Agent-specific filtering
+    # Cursor-based pagination for 10K+ messages
     # Return conversation metadata + messages
 
 @router.patch("/projects/{project_id}/spec")
@@ -297,9 +621,7 @@ async def update_project_spec(
     patch_operations: List[JSONPatchOperation]
 ):
     # Apply JSON Patch operations
-    # Validate against schema
     # Broadcast updates via WebSocket
-    # Return updated spec with version info
 
 @router.post("/projects/{project_id}/actions")
 async def submit_human_action(
@@ -307,21 +629,43 @@ async def submit_human_action(
     action: HumanActionRequest
 ):
     # Process human decision
-    # Update project state
     # Resume agent workflow
-    # Return confirmation
+
+@router.get("/projects/{project_id}/artifacts")
+async def get_artifacts(
+    project_id: str,
+    phase: Optional[str] = None
+):
+    # List artifacts by phase in GitHub Codespaces file system
+    # Generate download URLs
+
+@router.post("/projects/{project_id}/settings")
+async def update_settings(
+    project_id: str,
+    settings: SettingsUpdate
+):
+    # Update theme, notifications, or role assignments
+    # Broadcast updates via WebSocket
+
+@router.get("/projects/{project_id}/logs")
+async def get_logs(
+    project_id: str,
+    cursor: Optional[str] = None,
+    limit: int = 50
+):
+    # Retrieve system logs with cursor-based pagination
+    # Filter by agent or event if specified
 ```
 
 ### 5.2 Enhanced Data Models
 
 ```python
-# Pydantic Models with Validation
 class AgentMessage(BaseModel):
     id: str = Field(default_factory=lambda: f"msg_{uuid4().hex[:8]}")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     from_agent: str
     to_agent: Optional[str] = None
-    message_type: Literal["handoff", "conflict", "agreement", "escalation"]
+    message_type: Literal["handoff", "conflict", "agreement", "escalation", "artifact", "settings", "command", "start", "complete", "error"]
     content: MessageContent
     thread_id: str
     attempt_number: int = 1
@@ -334,6 +678,9 @@ class MessageContent(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
     confidence: Optional[float] = Field(ge=0.0, le=1.0)
     attachments: List[str] = Field(default_factory=list)
+    artifact_path: Optional[str] = None
+    settings_change: Optional[Dict[str, Any]] = None
+    task: Optional[str] = None
 
 class ProjectSpec(BaseModel):
     project_id: str
@@ -343,154 +690,185 @@ class ProjectSpec(BaseModel):
     changes: List[str] = Field(default_factory=list)
     spec: SpecContent
     history: List[SpecVersion] = Field(default_factory=list)
-    
-    def apply_patch(self, operations: List[JSONPatchOperation]) -> 'ProjectSpec':
-        # Implement JSON Patch application
-        # Increment version
-        # Add to history
-        pass
-```
 
-### 5.3 WebSocket Management
+class Artifact(BaseModel):
+    project_id: str
+    phase: Literal['requirements', 'design', 'development', 'testing', 'deployment', 'maintenance']
+    name: str
+    path: str
+    download_url: str
 
-```python
-# Enhanced WebSocket Handler
-class WebSocketManager:
-    def __init__(self):
-        self.connections: Dict[str, WebSocket] = {}
-        self.project_subscribers: Dict[str, Set[str]] = {}
-        
-    async def subscribe_to_project(self, websocket: WebSocket, project_id: str):
-        # Manage project-specific subscriptions
-        # Handle connection cleanup
-        # Broadcast to relevant subscribers only
-        
-    async def broadcast_agent_message(self, project_id: str, message: AgentMessage):
-        # Real-time message broadcasting
-        # Message queuing for disconnected clients
-        # Delivery confirmation tracking
+class Log(BaseModel):
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    level: Literal['info', 'warning', 'error']
+    agent: str
+    event: str
+    message: Optional[str] = None
+    task: Optional[str] = None
 ```
 
 ## 6. Data Persistence Strategy
 
-### 6.1 Enhanced Storage Components
+### 6.1 Storage Components
 
 | Data Type | Format | Primary Location | Cache Strategy | Update Pattern |
 |-----------|--------|------------------|----------------|----------------|
 | **Conversations** | JSONL | `/data/conversations/{project_id}.jsonl` | IndexedDB (client) | Append-only |
 | **Project Spec** | JSON | `/data/specs/{project_id}.json` | Zustand store | JSON Patch versioning |
 | **Agent State** | JSON | In-memory + WebSocket | Browser memory | Real-time updates |
-| **Generated Code** | Files | `/data/artifacts/{project_id}/` | None | Git-like versioning |
+| **Artifacts** | Files | `/data/artifacts/{project_id}/{phase}/` | None | File-based, no versioning (POC) |
+| **System Logs** | JSONL | `/data/logs/{project_id}.jsonl` | IndexedDB | Append-only |
 | **UI Cache** | Various | IndexedDB | LRU eviction | Background sync |
+| **Roles** | Markdown | `/data/roles/` | IndexedDB | File-based, updated by Product Owner |
 
 ### 6.2 Client-Side Caching Strategy
 
 ```javascript
-// IndexedDB Integration for Offline Support
 class ConversationCache {
   constructor() {
     this.db = null;
-    this.maxCacheSize = 1000; // messages per agent
+    this.maxCacheSize = 1000;
   }
   
   async cacheConversation(agentId, messages) {
-    // Store in IndexedDB
-    // Implement LRU eviction
-    // Background sync with server
+    const db = await openIndexedDB();
+    await db.put('conversations', { agentId, messages });
+  }
+}
+
+class LogsCache {
+  constructor() {
+    this.db = null;
+    this.maxCacheSize = 1000;
   }
   
-  async getCachedMessages(agentId, limit = 50) {
-    // Retrieve from IndexedDB
-    // Merge with in-memory cache
-    // Return for offline access
+  async cacheLogs(projectId, logs) {
+    const db = await openIndexedDB();
+    await db.put('logs', { projectId, logs });
   }
 }
 ```
 
-### 6.3 Enhanced Spec Versioning with JSON Patch
+### 6.3 Spec Versioning with JSON Patch
 
 ```python
-# JSON Patch Operations for Granular Updates
 class SpecVersionManager:
     def apply_patch(self, spec: ProjectSpec, operations: List[JSONPatchOperation]) -> ProjectSpec:
-        """Apply RFC 6902 JSON Patch operations to project spec"""
         import jsonpatch
-        
-        # Create patch object
         patch = jsonpatch.JsonPatch(operations)
-        
-        # Apply patch to spec content
         updated_spec_dict = patch.apply(spec.spec.dict())
-        
-        # Create new version
         new_spec = spec.copy(deep=True)
         new_spec.spec = SpecContent(**updated_spec_dict)
         new_spec.version += 1
         new_spec.updated_at = datetime.utcnow()
         new_spec.history.append(SpecVersion.from_spec(spec))
-        
         return new_spec
 ```
 
 ## 7. User Interface Design
 
-### 7.1 Updated Dashboard Layout with Tailwind CSS
+### 7.1 Dashboard Layout with Tailwind CSS
 
 ```jsx
-// Main Dashboard Component
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('analyst');
-  const [isActionQueueOpen, setIsActionQueueOpen] = useState(true);
-  
   return (
-    <div className="h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
+    <div className="h-screen bg-gray-50 dark:bg-slate-900 flex flex-col">
       <Header />
-      
-      {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Agent Consoles Area */}
+        <Sidebar />
         <div className="flex-1 flex flex-col">
-          {/* Tab Navigation */}
-          <div className="bg-white border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
-              {agents.map(agent => (
-                <TabButton 
-                  key={agent.id}
-                  agent={agent}
-                  isActive={activeTab === agent.id}
-                  onClick={() => setActiveTab(agent.id)}
-                />
-              ))}
-            </nav>
-          </div>
-          
-          {/* Active Agent Console */}
-          <div className="flex-1 p-6">
-            <AgentConsole agentId={activeTab} />
-          </div>
+          <CommandCenter />
+          <AgentGrid />
+          <ConflictMonitoring />
         </div>
-        
-        {/* Action Queue Sidebar */}
-        <ActionQueue 
-          isOpen={isActionQueueOpen}
-          onToggle={() => setIsActionQueueOpen(!isActionQueueOpen)}
-        />
+        <ActionQueue />
       </div>
     </div>
   );
 };
 ```
 
-### 7.2 Enhanced Real-time Features
+### 7.2 Tasks Page
 
 ```jsx
-// Real-time Agent Status Indicators
+const TasksPage = () => {
+  const agents = useAgentStore((state) => Object.values(state.agents));
+  
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+      <table className="w-full">
+        <thead>
+          <tr>
+            <th>Agent</th>
+            <th>Task</th>
+            <th>Status</th>
+            <th>Todo</th>
+            <th>In Progress</th>
+            <th>Done</th>
+            <th>Failed</th>
+          </tr>
+        </thead>
+        <tbody>
+          {agents.map((agent) => (
+            <tr key={agent.id}>
+              <td>{agent.name} ({agent.role})</td>
+              <td>{agent.currentTask || '-'}</td>
+              <td>{agent.status}</td>
+              <td>{agent.queue.todo}</td>
+              <td>{agent.queue.inProgress}</td>
+              <td>{agent.queue.done}</td>
+              <td>{agent.queue.failed}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+```
+
+### 7.3 Logs Page
+
+```jsx
+const LogsPage = () => {
+  const logs = useLogsStore((state) => state.logs);
+  
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+      <table className="w-full">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Agent</th>
+            <th>Event</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {logs.map((log, i) => {
+            const parsed = JSON.parse(log);
+            return (
+              <tr key={i}>
+                <td>{parsed.timestamp}</td>
+                <td>{parsed.agent}</td>
+                <td>{parsed.event}</td>
+                <td>{parsed.message || parsed.task}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+```
+
+### 7.4 Real-time Features
+
+```jsx
 const AgentStatusIndicator = ({ agentId }) => {
   const status = useAgentStore(state => state.agents[agentId]?.status);
-  const confidence = useAgentStore(state => state.agents[agentId]?.confidence);
-  
-  const statusConfig = {
+  const config = {
     'idle': { color: 'gray', icon: '⚪', label: 'Idle' },
     'thinking': { color: 'yellow', icon: '🟡', label: 'Processing' },
     'waiting': { color: 'blue', icon: '🔵', label: 'Waiting' },
@@ -498,16 +876,9 @@ const AgentStatusIndicator = ({ agentId }) => {
   };
   
   return (
-    <div className="flex items-center space-x-2">
-      <span className="text-lg">{statusConfig[status]?.icon}</span>
-      <span className="text-sm font-medium text-gray-700">
-        {statusConfig[status]?.label}
-      </span>
-      {confidence && (
-        <span className="text-xs text-gray-500">
-          ({Math.round(confidence * 100)}%)
-        </span>
-      )}
+    <div className="flex items-center gap-2">
+      <span className={`w-3 h-3 rounded-full bg-${config[status]?.color}-500`}></span>
+      <span>{config[status]?.label}</span>
     </div>
   );
 };
@@ -515,10 +886,9 @@ const AgentStatusIndicator = ({ agentId }) => {
 
 ## 8. LLM Integration Strategy
 
-### 8.1 Enhanced Agent-LLM Configuration
+### 8.1 Agent-LLM Configuration
 
 ```python
-# Updated LLM Configuration with Error Handling
 AGENT_LLM_CONFIG = {
     "analyst": {
         "primary": {
@@ -534,52 +904,11 @@ AGENT_LLM_CONFIG = {
             "max_tokens": 2000
         }
     },
-    "architect": {
-        "primary": {
-            "provider": "anthropic", 
-            "model": "claude-3-sonnet",
-            "temperature": 0.2,
-            "max_tokens": 3000
-        },
-        "fallback": {
-            "provider": "openai",
-            "model": "gpt-4o-mini",
-            "temperature": 0.2,
-            "max_tokens": 3000
-        }
-    },
-    "developer": {
-        "primary": {
-            "provider": "anthropic",
-            "model": "claude-3-sonnet", 
-            "temperature": 0.1,
-            "max_tokens": 4000
-        },
-        "fallback": {
-            "provider": "openai",
-            "model": "gpt-4o-mini",
-            "temperature": 0.1,
-            "max_tokens": 4000
-        }
-    },
-    "tester": {
-        "primary": {
-            "provider": "openai",
-            "model": "gpt-4o-mini",
-            "temperature": 0.2,
-            "max_tokens": 2000
-        },
-        "fallback": {
-            "provider": "anthropic",
-            "model": "claude-3-haiku",
-            "temperature": 0.2,
-            "max_tokens": 2000
-        }
-    }
+    # ... other agents
 }
 ```
 
-### 8.2 Enhanced Error Handling and Retry Logic
+### 8.2 Error Handling and Retry Logic
 
 ```python
 class LLMProvider:
@@ -588,38 +917,28 @@ class LLMProvider:
         self.fallback_config = config["fallback"]
         self.retry_attempts = 3
         self.timeout_seconds = 30
+        self.cost_tracker = CostTracker()
         
     async def generate_response(self, prompt: str, context: Dict) -> AgentResponse:
-        """Generate response with automatic fallback and retry logic"""
-        
         for attempt in range(self.retry_attempts):
             try:
-                # Try primary provider
                 response = await self._call_llm(self.primary_config, prompt, context)
+                self.cost_tracker.log_usage(self.primary_config, response)
                 return response
-                
             except RateLimitError:
-                # Switch to fallback provider
                 response = await self._call_llm(self.fallback_config, prompt, context)
+                self.cost_tracker.log_usage(self.fallback_config, response)
                 return response
-                
             except TimeoutError:
                 if attempt < self.retry_attempts - 1:
-                    await asyncio.sleep(2 ** attempt)  # Exponential backoff
+                    await asyncio.sleep(2 ** attempt)
                     continue
-                else:
-                    raise AgentError(f"LLM timeout after {self.retry_attempts} attempts")
-                    
-            except Exception as e:
-                if attempt < self.retry_attempts - 1:
-                    continue
-                else:
-                    raise AgentError(f"LLM provider error: {str(e)}")
+                raise AgentError(f"LLM timeout after {self.retry_attempts} attempts")
 ```
 
 ## 9. Testing Strategy
 
-### 9.1 Enhanced Testing Components
+### 9.1 Testing Components
 
 | Component | Testing Approach | Tools | Coverage Target |
 |-----------|------------------|-------|-----------------|
@@ -630,52 +949,11 @@ class LLMProvider:
 | **E2E Workflow** | End-to-end agent orchestration | Playwright + Mock LLM | 60% |
 | **Real-time Features** | WebSocket connection testing | WebSocket test client | 70% |
 
-### 9.2 Enhanced Mock Testing Infrastructure
-
-```python
-# Mock LLM Provider for Testing
-class MockLLMProvider:
-    def __init__(self, scenario_responses):
-        self.responses = scenario_responses
-        self.call_count = 0
-        
-    async def generate_response(self, agent_type: str, prompt: str) -> AgentResponse:
-        self.call_count += 1
-        
-        if agent_type in self.responses:
-            response_data = self.responses[agent_type]
-            if isinstance(response_data, list):
-                # Sequential responses for multi-turn scenarios
-                index = min(self.call_count - 1, len(response_data) - 1)
-                return AgentResponse(**response_data[index])
-            else:
-                return AgentResponse(**response_data)
-        
-        return AgentResponse(
-            content="Mock response from " + agent_type,
-            confidence=0.8,
-            status="complete"
-        )
-
-# Test Scenarios
-CONFLICT_SCENARIO = {
-    "analyst": [
-        {"content": "Requirements analysis complete", "confidence": 0.9},
-        {"content": "Disagreeing with architect proposal", "confidence": 0.7}
-    ],
-    "architect": [
-        {"content": "Architecture proposal ready", "confidence": 0.8},
-        {"content": "Maintaining original design", "confidence": 0.6}
-    ]
-}
-```
-
 ## 10. Deployment Architecture
 
-### 10.1 Enhanced GitHub Codespaces Configuration
+### 10.1 GitHub Codespaces Configuration
 
 ```json
-// .devcontainer/devcontainer.json
 {
     "name": "BotArmy POC",
     "image": "mcr.microsoft.com/devcontainers/python:3.11",
@@ -696,7 +974,8 @@ CONFLICT_SCENARIO = {
     "ports": [3000, 8000, 5173],
     "postCreateCommand": "cd backend && pip install -r requirements.txt && cd ../frontend && npm install",
     "environment": {
-        "PYTHONPATH": "/workspaces/botarmy/backend"
+        "PYTHONPATH": "/workspaces/botarmy/backend",
+        "ARTIFACTS_BASE_URL": "/data/artifacts"
     }
 }
 ```
@@ -705,177 +984,182 @@ CONFLICT_SCENARIO = {
 
 ```bash
 # .env.example
-# LLM API Keys (required)
 OPENAI_API_KEY=your_openai_key_here
 ANTHROPIC_API_KEY=your_anthropic_key_here
-
-# Application Configuration
 ENVIRONMENT=development
 DEBUG=true
 CORS_ORIGINS=http://localhost:3000,http://localhost:5173
 LOG_LEVEL=INFO
-
-# WebSocket Configuration
 WS_HEARTBEAT_INTERVAL=30
 WS_CONNECTION_TIMEOUT=300
-
-# Agent Configuration
 MAX_AGENT_ATTEMPTS=3
 AGENT_TIMEOUT_SECONDS=300
 CONFLICT_ESCALATION_THRESHOLD=0.6
-
-# Storage Configuration
 DATA_DIRECTORY=./data
 MAX_LOG_FILE_SIZE=100MB
 LOG_RETENTION_DAYS=30
+ARTIFACTS_COMPRESSION=gzip
 ```
 
-## 11. Technical Risks & Enhanced Mitigation
+## 11. Technical Risks & Mitigation
 
-### 11.1 Updated Risk Assessment
+### 11.1 Risk Assessment
 
-| Risk | Impact | Probability | Enhanced Mitigation | Monitoring |
+| Risk | Impact | Probability | Mitigation | Monitoring |
 |------|--------|-------------|---------------------|------------|
-| **LLM API Rate Limits** | High | Medium | Multi-provider fallback, request queuing, exponential backoff | API usage dashboard |
-| **Agent Infinite Loops** | High | Medium | Enhanced loop detection, confidence thresholds, automatic escalation | Real-time conflict monitoring |
-| **Memory Usage (Large Logs)** | Medium | High | IndexedDB for client, log rotation, compression, pagination | Memory usage alerts |
-| **WebSocket Connection Loss** | Medium | Medium | Auto-reconnect with exponential backoff, message persistence, offline mode | Connection health metrics |
-| **Platform Storage Limits** | Medium | Medium | File cleanup automation, external storage hooks, compression | Storage usage tracking |
-| **Real-time UI Performance** | Medium | Low | Virtualized lists, optimistic updates, debounced renders | Performance monitoring |
-| **Type Safety Issues** | Low | Medium | Comprehensive TypeScript interfaces, runtime validation | Type checking in CI |
+| **LLM API Rate Limits** | High | Medium | Multi-provider fallback, request queuing | API usage dashboard |
+| **Agent Infinite Loops** | High | Medium | Loop detection, confidence thresholds | Conflict monitoring in Dashboard |
+| **Memory Usage (Large Logs)** | Medium | High | IndexedDB, log rotation, gzip compression | Memory usage alerts |
+| **WebSocket Connection Loss** | Medium | Medium | Auto-reconnect, message persistence | Connection health metrics |
+| **Platform Storage Limits** | Medium | Medium | File cleanup automation, gzip compression | Storage usage tracking |
+| **Real-time UI Performance** | Medium | Low | Virtualized lists, debounced renders | Performance monitoring |
 
-### 11.2 Enhanced Scalability Considerations
+### 11.2 Scalability Considerations
 
 ```python
-# Performance Optimization Strategies
 class PerformanceManager:
     def __init__(self):
-        self.message_cache_size = 1000  # Per agent
+        self.message_cache_size = 1000
         self.ui_update_debounce_ms = 100
         self.websocket_batch_size = 10
+        self.compression_algorithm = 'gzip'
         
     async def optimize_message_delivery(self, messages: List[AgentMessage]):
-        """Batch and optimize message delivery to UI"""
-        # Group messages by type and priority
         # Batch non-critical updates
-        # Prioritize user-facing updates
-        
-    def should_cache_message(self, message: AgentMessage) -> bool:
-        """Determine if message should be cached client-side"""
-        # Cache high-confidence final decisions
-        # Skip caching intermediate negotiations
-        # Always cache human escalations
-        return (
-            message.message_type in ['handoff', 'escalation'] or
-            message.content.confidence > 0.8
-        )
+        pass
 ```
 
 ## 12. Implementation Phases
 
 ### 12.1 Phase 1: Core Infrastructure (Week 1-2)
 - [x] **Backend Foundation**
-  - [ ] FastAPI server with WebSocket support
-  - [ ] Pydantic models for all data structures
-  - [ ] Basic message bus implementation
-  - [ ] LLM provider integration with fallback logic
+  - [x] FastAPI server with WebSocket support
+  - [x] Pydantic models for all data structures
+  - [x] Basic message bus implementation
+  - [x] LLM provider integration with fallback logic
   
 - [x] **Frontend Foundation**
-  - [ ] React + Vite + Tailwind CSS setup
-  - [ ] Zustand stores for state management
-  - [ ] WebSocket hook with reconnection logic
-  - [ ] Basic dashboard layout with tabs
+  - [x] React + Vite + Tailwind CSS setup
+  - [x] Zustand stores for state management
+  - [x] WebSocket hook with reconnection logic
+  - [x] Basic dashboard layout with tabs
 
 - [x] **Integration**
-  - [ ] Single agent (Analyst) end-to-end flow
-  - [ ] Real-time message display
-  - [ ] Basic error handling
+  - [x] Single agent (Analyst) end-to-end flow
+  - [x] Real-time message display
+  - [x] Basic error handling
 
 ### 12.2 Phase 2: Agent Orchestration (Week 3-4)
-- [x] **Multi-Agent System**
-  - [ ] All agent implementations (Analyst, Architect, Developer, Tester)
+- [ ] **Multi-Agent System**
+  - [ ] All agent implementations
   - [ ] Sequential workflow execution
-  - [ ] Enhanced conflict detection with confidence scoring
+  - [ ] Conflict detection with confidence scoring
   - [ ] Automatic escalation to human action queue
+  - [ ] Artifacts page with tabbed SDLC phases
+  - [ ] Settings page with role assignments
+  - [ ] Tasks page with queue metrics
+  - [ ] Logs page with formatted log table
+  - [ ] Conflict monitoring in Dashboard
 
-- [x] **Advanced UI Features**
-  - [ ] Action queue sidebar with priority handling
-  - [ ] Project spec viewer with version history
+- [ ] **Advanced UI Features**
+  - [ ] Action queue sidebar
+  - [ ] Project spec viewer
   - [ ] Real-time agent status indicators
-  - [ ] Optimistic UI updates with rollback
+  - [ ] Optimistic UI updates
+  - [ ] Message virtualization
 
-- [x] **Data Persistence**
+- [ ] **Data Persistence**
   - [ ] JSONL conversation logging
   - [ ] JSON Patch-based spec versioning
   - [ ] IndexedDB client-side caching
   - [ ] File-based artifact storage
+  - [ ] JSONL log storage
 
 ### 12.3 Phase 3: POC Refinement (Week 5-6)
-- [x] **Testing & Quality**
+- [ ] **Testing & Quality**
   - [ ] Comprehensive unit test suite
   - [ ] Integration tests for agent workflows
   - [ ] UI component testing
   - [ ] End-to-end testing with mock LLMs
 
-- [x] **Performance & UX**
+- [ ] **Performance & UX**
   - [ ] Message pagination and virtualization
   - [ ] WebSocket connection optimization
-  - [ ] UI responsiveness improvements
+  - [ ] UI responsiveness (100ms latency)
   - [ ] Error boundary implementation
 
-- [x] **Documentation & Deployment**
-  - [ ] API documentation (auto-generated)
+- [ ] **Documentation & Deployment**
+  - [ ] API documentation
   - [ ] User guide and setup instructions
   - [ ] GitHub Codespaces configuration
   - [ ] Production deployment preparation
 
-## 13. Updated Product Specification Requirements
+## 13. Product Specification Requirements
 
-### 13.1 New Technical Requirements to Add to PSD
+### 13.1 Technical Requirements
 
 ```markdown
 3.12 Enhanced Conflict Resolution
-- Maximum 3 negotiation attempts between agents before human escalation
-- Confidence threshold of 0.6 for automatic escalation triggers
-- 5-minute timeout for agent responses with automatic escalation
-- Loop detection in agent conversations with intervention
-- Real-time conflict monitoring dashboard
+- Maximum 3 negotiation attempts before human escalation
+- Confidence threshold of 0.6 for automatic escalation
+- 5-minute timeout for agent responses
+- Loop detection in agent conversations
+- Conflict monitoring integrated in Dashboard/Agents page
 
 3.13 Real-time Communication Architecture
-- WebSocket-based live agent conversation streaming with auto-reconnect
-- Human action queue with priority-based notifications and modal interfaces
-- Optimistic UI updates with server confirmation and rollback capability
-- Auto-reconnection for connection failures with exponential backoff
+- WebSocket-based streaming with auto-reconnect
+- Human action queue with priority-based notifications
+- Optimistic UI updates with server confirmation
 - Message batching for performance optimization
+- Gzip compression for large artifacts and logs
 
 3.14 Enhanced LLM Provider Management
-- Support for multiple LLM providers (OpenAI, Anthropic) with automatic fallback
-- Agent-specific model configuration with temperature and token limits
+- Support for OpenAI/Anthropic with automatic fallback
+- Agent-specific model configuration
 - Free tier management and intelligent rate limiting
-- Provider health monitoring and automatic switching
-- Cost tracking and usage analytics
+- Cost tracking and provider health monitoring
 
 3.15 Advanced State Management
-- Client-side caching with IndexedDB for offline capability
+- IndexedDB caching for offline capability
 - Cursor-based pagination for conversation history
-- JSON Patch operations for granular project spec updates
-- Real-time state synchronization across multiple browser tabs
-- Persistent UI preferences and layout customization
+- JSON Patch operations for project spec updates
+- Real-time state synchronization across tabs
+- Persistent UI preferences and role assignments
 
 3.16 Performance and Scalability
-- Message virtualization for large conversation histories
-- Debounced UI updates for real-time performance
+- Message virtualization for 10K+ messages
+- Debounced UI updates (100ms max latency)
 - Memory management with automatic cleanup
-- File compression and rotation for log management
+- Gzip compression for logs and artifacts
 - Background sync for offline-first functionality
+
+3.17 Artifacts Management
+- Tabbed Artifacts page for SDLC phases
+- Table format for all tabs except Development
+- Navigable folder tree for Development
+- GitHub Codespaces file system hosting with download URLs
+- Automatic artifact storage via Message Bus
+- Real-time updates via WebSockets
+
+3.18 User Settings
+- Settings page for theme toggle, notifications, and role assignments
+- Generic Markdown parsing for role .md files
+- Predefined SDLC roles with optional uploaded enhancements
+- IndexedDB persistence with tab synchronization
+- Dark mode toggle in sidebar with backend sync
+
+3.19 Task Management
+- Tasks page to display aggregated queue metrics
+- Filtering by agent and task status
+- Real-time task updates via WebSocket
 ```
 
-### 13.2 Updated Success Metrics
+### 13.2 Success Metrics
 
 ```markdown
 Technical Performance Metrics:
 - Agent conflict resolution rate < 20% human escalation
-- Message processing latency < 2 seconds for real-time UI updates
+- Message processing latency < 2 seconds for UI updates
 - WebSocket connection uptime > 99% with auto-recovery
 - UI responsiveness < 100ms for user interactions
 - System memory usage < 500MB for typical workflows
@@ -888,10 +1172,10 @@ User Experience Metrics:
 - User task completion rate > 90% without errors
 
 System Reliability Metrics:
-- System uptime > 95% during POC testing period
-- Data consistency rate > 99.9% for all persistence operations
+- System uptime > 95% during POC testing
+- Data consistency rate > 99.9% for persistence operations
 - LLM API fallback success rate > 95% during provider outages
-- Message delivery guarantee 100% for critical system communications
+- Message delivery guarantee 100% for critical communications
 - Recovery time < 30 seconds from connection failures
 ```
 
@@ -907,7 +1191,7 @@ cd botarmy
 # Backend setup
 cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
 
 # Frontend setup
@@ -919,10 +1203,7 @@ cp .env.example .env
 # Edit .env with your API keys
 
 # Start development servers
-# Terminal 1 - Backend
 cd backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000
-
-# Terminal 2 - Frontend
 cd frontend && npm run dev
 ```
 
@@ -930,14 +1211,8 @@ cd frontend && npm run dev
 
 ```bash
 # Automatic setup via devcontainer.json
-# 1. Open repository in GitHub Codespaces
-# 2. Wait for container initialization
-# 3. Configure environment variables in terminal:
-
 export OPENAI_API_KEY="your_key_here"
 export ANTHROPIC_API_KEY="your_key_here"
-
-# 4. Start both servers:
 cd backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000 &
 cd frontend && npm run dev
 ```
@@ -947,10 +1222,8 @@ cd frontend && npm run dev
 ### 15.1 REST API Endpoints
 
 ```python
-# Comprehensive API endpoint definitions
 @app.get("/api/health")
 async def health_check():
-    """System health check endpoint"""
     return {"status": "healthy", "timestamp": datetime.utcnow()}
 
 @app.get("/api/projects/{project_id}/conversations")
@@ -960,127 +1233,125 @@ async def get_conversations(
     cursor: Optional[str] = None,
     limit: int = Query(50, ge=1, le=100)
 ):
-    """
-    Retrieve conversation history with cursor-based pagination
-    
-    Args:
-        project_id: Unique project identifier
-        agent_id: Filter by specific agent (optional)
-        cursor: Pagination cursor (optional)
-        limit: Number of messages to return (1-100)
-    
-    Returns:
-        ConversationResponse with messages and pagination info
-    """
+    # Retrieve conversation history with pagination
 
 @app.patch("/api/projects/{project_id}/spec")
 async def update_project_spec(
     project_id: str,
     patch_operations: List[JSONPatchOperation]
 ):
-    """
-    Update project specification using JSON Patch operations
-    
-    Args:
-        project_id: Unique project identifier
-        patch_operations: RFC 6902 JSON Patch operations
-    
-    Returns:
-        Updated ProjectSpec with new version number
-    """
+    # Update project specification
 
 @app.post("/api/projects/{project_id}/actions")
 async def submit_human_action(
     project_id: str,
     action: HumanActionRequest
 ):
-    """
-    Submit human decision for agent conflict resolution
-    
-    Args:
-        project_id: Unique project identifier
-        action: Human decision data
-    
-    Returns:
-        ActionResponse with workflow resumption status
-    """
+    # Submit human decision
 
-@app.websocket("/ws/projects/{project_id}")
-async def websocket_endpoint(websocket: WebSocket, project_id: str):
-    """
-    WebSocket connection for real-time agent communication
-    
-    Message Types:
-        - agent_message: Real-time agent conversations
-        - status_update: Agent status changes
-        - action_required: Human intervention needed
-        - spec_update: Project specification changes
-    """
+@app.get("/api/projects/{project_id}/artifacts")
+async def get_artifacts(
+    project_id: str,
+    phase: Optional[str] = None
+):
+    # List artifacts by phase
+
+@app.post("/api/projects/{project_id}/settings")
+async def update_settings(
+    project_id: str,
+    settings: SettingsUpdate
+):
+    # Update user settings
+
+@app.get("/api/projects/{project_id}/logs")
+async def get_logs(
+    project_id: str,
+    cursor: Optional[str] = None,
+    limit: int = Query(50, ge=1, le=100)
+):
+    # Retrieve system logs
 ```
 
 ### 15.2 WebSocket Message Specifications
 
 ```typescript
-// Complete WebSocket message type definitions
 interface WebSocketMessage {
-  type: 'agent_message' | 'status_update' | 'action_required' | 'spec_update' | 'system_notification';
+  type: 'agent_message' | 'status_update' | 'action_required' | 'spec_update' | 'artifact_update' | 'settings_update' | 'task_start' | 'task_complete' | 'task_error';
   timestamp: string;
   project_id: string;
-  data: MessageData;
-}
-
-interface MessageData {
-  // For agent_message type
-  message?: {
-    id: string;
-    from_agent: string;
-    to_agent: string | null;
-    content: {
-      text: string;
-      metadata: Record<string, any>;
-      confidence?: number;
-    };
-    thread_id: string;
-    message_type: 'handoff' | 'conflict' | 'agreement' | 'escalation';
-  };
-  
-  // For status_update type
-  status?: {
-    agent_id: string;
-    status: 'idle' | 'thinking' | 'waiting' | 'error';
-    current_task?: string;
-    confidence: number;
-    last_activity: string;
-  };
-  
-  // For action_required type
-  action?: {
-    id: string;
-    priority: 'low' | 'medium' | 'high' | 'urgent';
-    title: string;
-    description: string;
-    options: Array<{
+  data: {
+    message?: {
       id: string;
-      label: string;
-      description?: string;
-    }>;
-    deadline?: string;
-    context: Record<string, any>;
-  };
-  
-  // For spec_update type
-  spec_update?: {
-    version: number;
-    updated_by: string;
-    changes: string[];
-    patch_operations: Array<{
-      op: 'add' | 'remove' | 'replace' | 'move' | 'copy' | 'test';
-      path: string;
-      value?: any;
-      from?: string;
-    }>;
+      from_agent: string;
+      to_agent: string | null;
+      content: {
+        text: string;
+        metadata: Record<string, any>;
+        confidence?: number;
+        artifact_path?: string;
+        settings_change?: Record<string, any>;
+        task?: string;
+      };
+      thread_id: string;
+      message_type: 'handoff' | 'conflict' | 'agreement' | 'escalation' | 'artifact' | 'settings' | 'command' | 'start' | 'complete' | 'error';
+    };
+    status?: {
+      agent_id: string;
+      status: 'idle' | 'thinking' | 'waiting' | 'error';
+      current_task?: string;
+      confidence: number;
+      last_activity: string;
+      queue: {
+        todo: number;
+        inProgress: number;
+        done: number;
+        failed: number;
+      };
+      performance: number;
+    };
+    action?: {
+      id: string;
+      priority: 'low' | 'medium' | 'high' | 'urgent';
+      title: string;
+      description: string;
+      options: Array<{
+        id: string;
+        label: string;
+        description?: string;
+      }>;
+      deadline?: string;
+      context: Record<string, any>;
+    };
+    spec_update?: {
+      version: number;
+      updated_by: string;
+      changes: string[];
+      patch_operations: Array<{
+        op: 'add' | 'remove' | 'replace' | 'move' | 'copy' | 'test';
+        path: string;
+        value?: any;
+        from?: string;
+      }>;
+    };
+    artifact?: {
+      projectId: string;
+      phase: string;
+      artifactPath: string;
+      artifactName: string;
+      downloadUrl: string;
+    };
+    settings?: {
+      projectId: string;
+      theme: 'light' | 'dark';
+      notificationsEnabled: boolean;
+      roleAssignments: Record<string, string>;
+    };
+    task?: {
+      agentId: string;
+      task: string;
+      status: 'start' | 'complete' | 'error';
+      errorMessage?: string;
+    };
   };
 }
 ```
-
-This comprehensive architecture document now provides detailed answers to all developer questions and establishes a robust foundation for building the BotArmy POC. The architecture supports real-time collaboration, efficient state management, and scalable agent orchestration while maintaining simplicity for rapid POC development.

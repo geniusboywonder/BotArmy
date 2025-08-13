@@ -62,15 +62,13 @@ BotArmy is an autonomous Product Generator that builds functional Proof-of-Conce
   - Sequential workflow orchestration with parallel capability planning
   - Conflict detection and resolution with automatic escalation thresholds
   - Message bus architecture with persistent logging and real-time streaming
-  - Architect to investigate agent-to-agent (A2A) protocol for handoffs and interactions
 
 ### 3.6 Enhanced UI and UX
 - **Dashboard Layout:**
-  - Sidebar navigation with pages for Dashboard, Agents, Logs, Settings, and Artifacts
-  - Single Command Center chat interface for user-to-system commands and system messages
-  - View-only chat-like interfaces in each agent’s block for agent-specific conversation logs with structured metadata
-  - Collapsible action queue sidebar for priority-based notifications (future enhancement)
-  - Modal project specification viewer with version history, integrated with Artifacts page
+  - Tabbed agent consoles with real-time status indicators
+  - Collapsible action queue sidebar with priority-based notifications
+  - Modal project specification viewer with version history
+  - Chat-like interface for agent conversations with structured metadata overlay
 - **Real-time Features:**
   - Optimistic UI updates with server confirmation and rollback capability
   - Live agent status indicators (idle, thinking, waiting, error) with confidence scores
@@ -82,7 +80,7 @@ BotArmy is an autonomous Product Generator that builds functional Proof-of-Conce
 - **Project Specifications:** JSON with RFC 6902 JSON Patch versioning for granular updates
 - **Agent State:** In-memory with periodic snapshots and WebSocket broadcasting
 - **Client-side Caching:** IndexedDB with LRU eviction and background sync for offline capability
-- **Generated Artifacts:** File-based storage with compression, no versioning for POC
+- **Generated Artifacts:** File-based storage with version control and compression
 
 ### 3.8 Deployment Architecture
 - **Primary Platform:** GitHub Codespaces with automatic devcontainer setup
@@ -99,10 +97,10 @@ BotArmy is an autonomous Product Generator that builds functional Proof-of-Conce
 ### 3.10 Enhanced Product Owner Interaction
 - **Input Methods:**
   - UI input forms for initial requirements and project specifications
-  - Action queue interface for conflict resolution and decision making (via chat notifications)
-  - Real-time Command Center chat interface for direct system communication
+  - Action queue interface for conflict resolution and decision making
+  - Real-time chat interface for direct agent communication when needed
 - **Notification System:**
-  - Priority-based notifications (urgent, high, medium, low) with visual indicators in chat
+  - Priority-based notifications (urgent, high, medium, low) with visual indicators
   - Email/SMS integration for critical escalations (future enhancement)
   - In-app notifications with context and recommended actions
 
@@ -123,7 +121,6 @@ BotArmy is an autonomous Product Generator that builds functional Proof-of-Conce
   - Confidence threshold of 0.6 for automatic escalation triggers
   - 5-minute timeout for agent responses with automatic escalation
   - Loop detection in agent conversations with intervention
-  - Escalations displayed as priority-based notifications in Command Center chat
   - Real-time conflict monitoring dashboard with escalation analytics
 
 ### 3.13 Real-time Communication Architecture
@@ -132,10 +129,9 @@ BotArmy is an autonomous Product Generator that builds functional Proof-of-Conce
   - Auto-reconnection with exponential backoff and connection health monitoring
   - Message persistence and delivery guarantee for critical communications
   - Heartbeat mechanism for connection validation and cleanup
-  - Integration with Message Bus for agent handoffs, logs, and artifact storage
 - **Human Action Queue:**
-  - Priority-based notifications in Command Center chat with contextual information and decision options
-  - Modal interfaces for complex decision forms with validation (future enhancement)
+  - Priority-based notifications with contextual information and decision options
+  - Modal interfaces for complex decision forms with validation
   - Deadline tracking and escalation for time-sensitive decisions
   - Action history and audit trail for decision accountability
 
@@ -175,41 +171,6 @@ BotArmy is an autonomous Product Generator that builds functional Proof-of-Conce
   - File compression and rotation for log management and storage optimization
   - Background sync for offline-first functionality and data consistency
 
-### 3.17 Artifacts Management
-- Implement an "Artifacts" page in the dashboard UI as a sidebar navigation item to store and display outputs from all SDLC phases, primarily for the Product Owner to download artifacts
-- Provide tabbed navigation within the Artifacts page for each SDLC phase:
-  - **Requirements Gathering** (Analyst role): Store and display Requirements Document and Use Cases (.md or Word files)
-  - **Design** (Architect role): Store and display Architecture Diagrams (.png/.jpeg/PDF) and Design Models (.md)
-  - **Development** (Developer role): Store and display Source Code (.java/.py) and Code Documentation (.md)
-  - **Testing** (Tester role): Store and display Test Plans (.md), Test Cases (.xlsx), and Test Scripts (.sh)
-  - **Deployment** (Deployer role): Store and display Deployment Scripts (.sh/.yaml) and Configuration Files (.json/.xml)
-  - **Maintenance** (Deployer role): Store and display Monitoring Reports (.md) and Logs (.txt), with real-time streaming of JSONL logs
-- Display artifacts in a table format (columns: Document Name, Download Link) for all tabs except Development, flattening any folder structure for simplicity
-- For the Development tab, display artifacts in a navigable folder tree view to handle large and hierarchical code structures
-- Defer preview functionality for Markdown (.md), images (.png/.jpeg), and PDFs to a later phase
-- Store artifacts in a backend folder structure (not exposed to users except via Development tab’s tree view):
-  - /project-root/requirements/gathering (e.g., requirements.md, use_cases.md)
-  - /project-root/design/architecture (e.g., architecture_diagram.png, design_model.md)
-  - /project-root/development/source_code (e.g., main.java, utils.py) and /documentation (e.g., code_documentation.md)
-  - /project-root/testing/test_plans (e.g., test_plan.md), /test_cases (e.g., test_cases.xlsx), /test_scripts (e.g., test_script.sh)
-  - /project-root/deployment (e.g., deployment_script.sh, config.json)
-  - /project-root/maintenance (e.g., monitoring_report.md, logs.txt)
-- Allow dynamic folder hierarchy for Development artifacts based on Architect Agent decisions
-- Generate and store artifacts automatically via the Message Bus after agent task completion, with updates to existing artifacts based on Product Owner feedback
-- Use stubbed hosting for artifact storage (e.g., URLs like https://yourserver.com/artifacts/{phase}/{artifact_name}), integrated with GitHub Codespaces or Vercel, with final hosting details to be determined by the Architect
-- Ensure real-time updates to the Artifacts page via WebSockets when new or updated artifacts are generated
-- Handle large Development artifacts efficiently with compression, without versioning for the POC
-
-### 3.18 User Settings
-- Implement a Settings page in the dashboard UI, accessible via sidebar navigation, to manage user preferences and agent configurations
-- Include settings for:
-  - Theme toggle (light/dark mode) for UI customization
-  - Notifications toggle to enable/disable in-app notifications
-  - Agent role assignment, allowing Product Owner to map specific roles (e.g., Analyst, Architect) to agents from .md files (e.g., role definitions in analyst_role.md)
-- Persist settings in client-side storage (IndexedDB) with real-time synchronization across tabs
-- Provide validation for role assignments to ensure compatibility with SDLC roles and agent capabilities
-- Ensure settings changes trigger immediate UI updates and log events via Message Bus
-
 ## 4. User Stories
 
 | ID | User Story | Enhanced Acceptance Criteria |
@@ -218,13 +179,9 @@ BotArmy is an autonomous Product Generator that builds functional Proof-of-Conce
 | US-2 | As an Analyst Agent, I want to clarify requirements with stakeholders so that ambiguities are minimized. | Analyst automatically detects unclear requirements, generates specific questions, logs all clarifications with confidence scores, and updates specs with JSON Patch operations. |
 | US-3 | As a Developer Agent, I want clear architecture specs so that I can implement functional code modules. | Developer receives complete technical specifications, can request clarifications through conflict resolution system, outputs modular tested code artifacts, and reports implementation progress in real-time. |
 | US-4 | As a Tester Agent, I want acceptance criteria to validate product quality so that bugs are detected early. | Tests automatically generated from acceptance criteria, comprehensive coverage reports, integration with CI/CD pipeline, and real-time quality metrics dashboard. |
-| US-5 | As a Product Owner, I want to be notified of conflicts so I can resolve them and keep development moving. | Priority-based notifications in Command Center chat, contextual decision interfaces, decision impact analysis, and workflow auto-resumption after resolution. |
-| US-6 | As a System User, I want real-time visibility into agent progress so I can monitor development status. | Live agent status indicators, conversation streaming in Command Center and view-only agent chats, progress tracking, performance metrics, and predictive completion estimates. |
-| US-7 | As a Developer, I want to see conversation history so I can understand agent decisions and maintain context. | Searchable conversation logs in Logs page and view-only agent chats, structured metadata display, version history, and exportable audit trails. |
-| US-8 | As a Product Owner, I want an Artifacts page with tabbed SDLC phases so that I can easily access and download outputs from the product generation process. | Tabs load with tables (or folder tree for Development); download links functional; integrates with dashboard via sidebar nav without errors; page load time < 3 seconds. |
-| US-9 | As an Agent (e.g., Analyst, Developer), I want artifacts automatically stored in a structured folder system so that outputs are organized and retrievable. | Files saved to correct paths via Message Bus after task completion; updates applied based on Product Owner feedback; no data loss; dynamic folders for Development artifacts. |
-| US-10 | As a Product Owner, I want a Settings page to configure UI preferences and agent roles so that I can customize the system and assign roles from .md files. | Settings page in sidebar nav; supports theme toggle, notifications, and role assignment from .md files; changes persist in IndexedDB; updates reflected in real-time with no errors. |
-| US-11 | As a System User, I want to filter logs by agent on the Logs page so that I can focus on specific agent activities. | Logs page supports agent-based filtering; displays JSONL logs with no data loss; filtering available in Phase 2; response time < 500ms. |
+| US-5 | As a Product Owner, I want to be notified of conflicts so I can resolve them and keep development moving. | Priority-based notifications, contextual decision interfaces, decision impact analysis, and workflow auto-resumption after resolution. |
+| US-6 | As a System User, I want real-time visibility into agent progress so I can monitor development status. | Live agent status indicators, conversation streaming, progress tracking, performance metrics, and predictive completion estimates. |
+| US-7 | As a Developer, I want to see conversation history so I can understand agent decisions and maintain context. | Searchable conversation logs, structured metadata display, version history, and exportable audit trails. |
 
 ## 5. Enhanced Success Metrics
 
@@ -239,9 +196,6 @@ BotArmy is an autonomous Product Generator that builds functional Proof-of-Conce
   - WebSocket connection uptime > 99% with auto-recovery
   - UI responsiveness < 100ms for user interactions
   - System memory usage < 500MB for typical workflows
-  - Artifact storage success rate > 99%
-  - Artifact download latency < 2 seconds
-  - Settings update latency < 1 second
 - **Data Integrity:**
   - Data consistency rate > 99.9% for all persistence operations
   - Message delivery guarantee 100% for critical system communications
@@ -253,9 +207,6 @@ BotArmy is an autonomous Product Generator that builds functional Proof-of-Conce
   - Average time to first productive agent output < 2 minutes
   - Human intervention required < 1 time per 10 agent interactions
   - User satisfaction score > 4.0/5.0 for interface usability
-  - Artifact retrieval task completion rate > 95%
-  - Satisfaction score for Artifacts UI > 4.0/5.0
-  - Satisfaction score for Settings UI > 4.0/5.0
 - **Performance:**
   - UI load time < 3 seconds on initial page load
   - Real-time update delivery < 1 second end-to-end
@@ -320,17 +271,15 @@ JSONL Logs → JSON Specs → IndexedDB Cache → Real-time UI → Notifications
 | Initial target web product types? | ✅ Resolved | Narrow-focus web apps, no e-commerce, blogs, or content generation. |
 | Frontend/backend technology stack? | ✅ Resolved | React + Tailwind CSS frontend, Python FastAPI backend, WebSocket real-time communication. |
 | State management architecture? | ✅ Resolved | Zustand for global state, IndexedDB for client caching, JSON Patch for spec updates. |
-| UI framework and styling approach? | ✅ Resolved | Tailwind CSS for utility-first styling, sidebar navigation with Dashboard, Agents, Logs, Settings, Artifacts. |
-| Real-time communication strategy? | ✅ Resolved | WebSockets with auto-reconnection, message batching, optimistic UI updates, Message Bus for handoffs/logs/artifacts. |
-| Agent console layout and navigation? | ✅ Resolved | Sidebar navigation with single Command Center chat, view-only agent chats, and Artifacts page. |
-| Conflict resolution and escalation? | ✅ Resolved | 3-attempt negotiation, confidence thresholds, priority-based notifications in Command Center chat. |
+| UI framework and styling approach? | ✅ Resolved | Tailwind CSS for utility-first styling, chat-like interfaces with structured metadata. |
+| Real-time communication strategy? | ✅ Resolved | WebSockets with auto-reconnection, message batching, optimistic UI updates. |
+| Agent console layout and navigation? | ✅ Resolved | Tabbed interface within single dashboard, collapsible action queue sidebar. |
+| Conflict resolution and escalation? | ✅ Resolved | 3-attempt negotiation, confidence thresholds, priority-based human action queue. |
 | LLM provider management strategy? | ✅ Resolved | Multi-provider support with automatic fallback, agent-specific configuration. |
 | Testing strategy and coverage targets? | ✅ Resolved | Comprehensive testing with mock LLM providers, 60-90% coverage targets. |
 | Deployment platform and environment? | ✅ Resolved | GitHub Codespaces primary, Docker for production, comprehensive environment config. |
 | Client-side caching and offline support? | ✅ Resolved | IndexedDB with LRU eviction, background sync, offline-first capability. |
 | Performance optimization strategies? | ✅ Resolved | Message virtualization, debounced updates, connection pooling, memory management. |
-| Artifacts page implementation and hosting? | ✅ Resolved | Artifacts page with SDLC tabs in sidebar nav; stubbed hosting integrated with GitHub Codespaces/Vercel, details by Architect; automatic storage via Message Bus with Product Owner updates; previews deferred. |
-| Settings page implementation? | ✅ Resolved | Settings page in sidebar nav with theme toggle, notifications, and agent role assignment from .md files; persists in IndexedDB. |
 | Security and authentication requirements? | 🔄 Pending | POC has minimal security; production security architecture to be defined. |
 | Multi-tenancy and user management? | 🔄 Pending | Single-user POC; multi-user architecture and role-based access control for future. |
 | Advanced analytics and monitoring? | 🔄 Pending | Basic metrics in POC; comprehensive analytics platform for production. |
@@ -348,14 +297,11 @@ JSONL Logs → JSON Specs → IndexedDB Cache → Real-time UI → Notifications
 
 ### 8.2 Phase 2: Agent System (Week 3-4)
 - 🔄 **Multi-Agent Orchestration**
-  - Complete agent implementations (Analyst, Architect, Developer, Tester, Deployment)
+  - Complete agent implementations (Analyst, Architect, Developer, Tester)
   - Sequential workflow execution with handoff protocols
   - Conflict detection and resolution with confidence scoring
-  - Human action queue with priority-based notifications in Command Center chat
+  - Human action queue with priority-based escalation
   - Project specification management with JSON Patch versioning
-  - Artifacts page with tabbed SDLC phases, table/folder views, and automatic artifact storage via Message Bus
-  - Settings page with theme toggle, notifications, and agent role assignment from .md files
-  - Log filtering by agent on Logs page
 
 ### 8.3 Phase 3: Advanced Features (Week 5-6)
 - 🔄 **Production-Ready Features**
@@ -372,6 +318,5 @@ JSONL Logs → JSON Specs → IndexedDB Cache → Real-time UI → Notifications
   - External tool integrations (GitHub, Slack, Jira)
   - Mobile application and progressive web app
   - Enterprise security and compliance features
-  - Artifact previews for Markdown, images, and PDFs
 
-This enhanced Product Specification Document provides a comprehensive foundation for the BotArmy POC development, incorporating all architectural decisions, detailed requirements for frontend and backend implementation, and updated UI and functionality based on the mockup.
+This enhanced Product Specification Document provides a comprehensive foundation for the BotArmy POC development, incorporating all architectural decisions and detailed requirements for both frontend and backend implementation.
