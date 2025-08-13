@@ -1,3 +1,0 @@
-message_bus:
-  enabled: true
-  event_types: [discovery, progress, change, fix]

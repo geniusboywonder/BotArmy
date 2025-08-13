@@ -1,3 +1,0 @@
-architecture:
-  components: [frontend, backend, api]
-  patterns: [microservices]

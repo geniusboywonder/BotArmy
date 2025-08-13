@@ -1,5 +1,0 @@
-agents:
-  analyst:
-    tools: [linear, notion, figma]
-  architect:
-    tools: [claude-code, miro]

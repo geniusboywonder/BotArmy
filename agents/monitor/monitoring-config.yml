@@ -1,3 +1,0 @@
-monitoring:
-  tools: [sentry, datadog]
-  metrics: [uptime, response_time]
