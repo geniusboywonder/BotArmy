@@ -1,0 +1,26 @@
+# Vibe-Coding Orchestrator - POC
+
+This is a minimal Python proof-of-concept for a vibe-coding orchestrator with two agents: Analyst and Architect.
+
+## Features
+- FastAPI server for agent communication
+- Analyst and Architect exchange JSON messages
+- Messages persisted in-memory
+- Escalation flags and statuses supported
+- Requirements collected in Markdown file by Analyst
+
+## Running the demo
+1. Install dependencies:
+pip install -r requirements.txt
+
+2. Start the API server:
+uvicorn api.server:app --reload
+
+3. In separate terminals, run the agents:
+python run_agents.py analyst
+python run_agents.py architect
+
+4. Observe message exchange logs and check `analyst_agent/requirements.md`.
+## Testing
+Run tests with:
+pytest
