@@ -1,0 +1,22 @@
+Below is a compact table summarizing the key architecture decisions from that doc:
+
+Area	POC (single free-tier platform)	Why this choice	Production-ready options (aiming for free tiers)
+Cloud & runtime	Deta Space (Micros) hosting both FastAPI backend and static React app	One platform to build/test/deploy/run, free tier, JSON-friendly NoSQL (Base) fits JSONL/JSON Patch needs	Vercel + Supabase (Postgres), Fly.io (Docker) + Neon (Postgres) + Upstash (Redis), Azure App Service (Free) + Azure SQL Free, Cloudflare Workers/DO + D1
+Frontend	React 19 + Vite 7 + Tailwind + TS	Current stable stack; fast DX and tree-shaking	Same; SSR/edge if using Vercel (Next.js optional). React 19 is stable. 
+React
+GitHub
+
+Backend	FastAPI 0.116.x + Uvicorn + WebSockets	Mature async API + native WS; strong ecosystem	Same; containerize for Fly.io or functions on Vercel; managed WS gateway if needed. 
+GitHub
+
+Multi-agent orchestration	LangChain / LangGraph (Python)	Quick graph-based agent workflows; active releases	Same with observability and evals (LangGraph Studio). 
+PyPI
+LangChain Changelog
+
+Data (POC)	Deta Base (NoSQL) + Drive for artifacts	JSON-native, free, minimal ops; perfect for logs/specs/artifacts	Migrate to Postgres (Supabase/Neon), move logs to object storage (S3/R2), Redis for rate limits/queues. (Deta Base/Drive limits documented in community/Space docs.) 
+GitHub
+
+Realtime	Backend WebSocket hub (FastAPI)	Simple, control over topics, fits POC	Managed WS (Ably/Pusher) or Cloudflare Durable Objects for scale
+CI/CD	GitHub Actions → Deta Space deploy	One pipeline; push on merge to main	Vercel / Fly.io native CI; DB migrations (Alembic/Prisma)
+Security (POC)	Env-based API keys; CORS restricted; log scrubbing	Minimal but safe for POC	OIDC auth (Clerk/Auth.js/Azure AD), RLS on Postgres, secret manager, rate limits, audit trail
+Testing	Pytest, React Testing Library, MSW, Playwright	Fast feedback; mock LLMs to save tokens	Add load tests, chaos, canary, OpenTelemetry tracing
