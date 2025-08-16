@@ -1,0 +1,58 @@
+graph TD
+    %% Header across top
+    subgraph HEADER[Header Bar]
+        H1[Env: development]
+        H2[Port: 3000]
+        H3[Log: info]
+        H4[Agent Manager: running<br/>Actions: start, stop<br/>Health: ok]
+    end
+
+    %% Invisible connector node
+    HEADER --> LAYOUT_START
+
+    %% Sidebar on left
+    subgraph SIDEBAR[Sidebar]
+        S1[Dashboard]
+        S2[Agents]
+        S3[Tasks]
+        S4[Logs]
+        S5[Settings]
+    end
+
+    %% Main content on right
+    subgraph MAIN[Main Content]
+        
+        %% Status cards at top row
+        subgraph STATUSCARDS[Status Cards]
+            SC1[System Status<br/>node >=18<br/>TypeScript<br/>Jest<br/>RateLimit: on]
+            SC2[Agent Manager<br/>Init: true<br/>Active: 2/10<br/>HealthCheck: 10s<br/>MaxRetries: 3]
+            SC3[Task Queue<br/>Size: 3<br/>Process: 1s<br/>Priorities: 10]
+        end
+        
+        %% Agents table in middle row
+        subgraph AGENTS[Agents Table]
+            AHEAD[Columns: Name, Type, Status, Tasks, Uptime, Actions]
+            A1[worker-1<br/>WORKER<br/>running<br/>12 tasks<br/>00:05:21<br/>stop / details]
+            A2[worker-2<br/>WORKER<br/>running<br/>9 tasks<br/>00:03:10<br/>stop / details]
+        end
+        
+        %% Tasks section bottom row
+        subgraph TASKS[Tasks]
+            subgraph SUBMIT[Submit Form]
+                F1[Type: process / calculate / transform]
+                F2[Priority: 1-10]
+                F3[Payload: JSON]
+                F4[Actions: validate, submit]
+            end
+            
+            subgraph RECENT[Recent Tasks]
+                R1[ab12<br/>process<br/>completed<br/>worker-1<br/>320ms]
+                R2[cd34<br/>calculate<br/>completed<br/>worker-2<br/>145ms]
+                R3[ef56<br/>transform<br/>queued<br/>agent: none]
+            end
+        end
+    end
+
+    %% Positioning flow
+    LAYOUT_START --> SIDEBAR
+    LAYOUT_START --> MAIN
