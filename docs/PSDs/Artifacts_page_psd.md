@@ -1,10 +1,9 @@
-Add another page for Artifacts where the output from the SDLC can be stored. 
-Perhaps a tab for each part of the SDLC? with a list of Artifacts and a link to download them. THe code artifacts may become quite large, so perhaps a folder tree would work better for them? 
+Add another page for Artifacts where the output from the SDLC can be stored.
+Perhaps a tab for each part of the SDLC? with a list of Artifacts and a link to download them. THe code artifacts may become quite large, so perhaps a folder tree would work better for them?
 
-The folder structure is not going to be shown to the user and just used for storage. 
-The table containing the name and hyperlink "flattens" the folders to present all the files for that phase in a simple table. 
+The folder structure is not going to be shown to the user and just used for storage.
+The table containing the name and hyperlink "flattens" the folders to present all the files for that phase in a simple table.
 It is just the Development phase where the folder structure is a better way to browse the files and structure.
- 
 
 SDLC Phases as Tabs
 Requirements Gathering
@@ -67,21 +66,21 @@ The folder structure should reflect the project structure, with a potential dyna
 
 Download Links
 The download links should point to files hosted on a server. A suggested URL structure could be:
-https://yourserver.com/artifacts/{phase}/{artifact_name}
+<https://yourserver.com/artifacts/{phase}/{artifact_name}>
 
 For example:
-https://yourserver.com/artifacts/requirements/gathering/requirements.md
+<https://yourserver.com/artifacts/requirements/gathering/requirements.md>
 
 Document Table Example
 You can create a table to display the documents with hyperlinks for downloading:
 
-Document Name	Download Link
-Requirements Document	Download
-Use Cases	Download
-Architecture Diagram	Download
-Source Code	Download
-Test Plan	Download
-Deployment Script	Download
+Document Name Download Link
+Requirements Document Download
+Use Cases Download
+Architecture Diagram Download
+Source Code Download
+Test Plan Download
+Deployment Script Download
 
 Preview Window
 For file types that support preview (like Markdown, images, and PDFs), you can implement a modal or a dedicated preview section on your web interface to display the content without downloading.

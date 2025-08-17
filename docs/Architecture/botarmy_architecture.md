@@ -39,6 +39,7 @@ BotArmy is designed as a **Sequential Agent Orchestration System** with real-tim
 ## 2. Technology Stack
 
 ### 2.1 Primary Platform: **GitHub Codespaces** (Recommended)
+
 - **Rationale**: Free tier available, persistent storage, web-based, supports full-stack development
 - **Alternative**: Replit (if GitHub Codespaces unavailable)
 - **Fallback**: Google Colab (limited web capabilities)
@@ -56,6 +57,7 @@ BotArmy is designed as a **Sequential Agent Orchestration System** with real-tim
 | **Testing** | Pytest + React Testing Library | Basic coverage for POC |
 
 ### 2.3 File Structure
+
 ```
 botarmy/
 ├── frontend/                   # React UI
@@ -132,12 +134,14 @@ class ConflictResolver:
 ### 3.3 Agent Communication Protocol
 
 **Sequential Workflow:**
+
 1. **Analyst** → Requirements Document → **Architect**
 2. **Architect** → Technical Specs → **Developer**  
 3. **Developer** → Code Artifacts → **Tester**
 4. **Tester** → Test Results → **Deployer**
 
 **Conflict Resolution Protocol:**
+
 1. Agent A sends message to Agent B
 2. Agent B responds with agreement/disagreement
 3. If disagreement, negotiate for up to 3 attempts
@@ -156,6 +160,7 @@ class ConflictResolver:
 | **Generated Code** | Files | `/data/artifacts/{project_id}/` | Version controlled |
 
 ### 4.2 Spec Versioning
+
 ```python
 {
     "project_id": "proj_001",
@@ -201,6 +206,7 @@ class ConflictResolver:
 ```
 
 ### 5.2 Real-time Features
+
 - **WebSocket connections** for live agent conversation streaming
 - **Auto-scroll** in conversation logs
 - **Toast notifications** for human action requirements
@@ -209,6 +215,7 @@ class ConflictResolver:
 ## 6. LLM Integration Strategy
 
 ### 6.1 Agent-LLM Mapping
+
 ```python
 AGENT_LLM_CONFIG = {
     "analyst": {
@@ -239,6 +246,7 @@ AGENT_LLM_CONFIG = {
 ```
 
 ### 6.2 Free Tier Management
+
 - **OpenAI**: GPT-4o-mini free tier
 - **Anthropic**: Claude-3-haiku free tier (if available)
 - **Fallback**: Groq Llama models for high-volume testing
@@ -246,6 +254,7 @@ AGENT_LLM_CONFIG = {
 ## 7. Deployment Architecture
 
 ### 7.1 GitHub Codespaces Setup
+
 ```yaml
 # .devcontainer/devcontainer.json
 {
@@ -260,6 +269,7 @@ AGENT_LLM_CONFIG = {
 ```
 
 ### 7.2 Container Structure (Future Migration)
+
 ```dockerfile
 # Dockerfile (for future use)
 FROM python:3.11-slim
@@ -274,6 +284,7 @@ CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ## 8. Testing Strategy
 
 ### 8.1 Testing Components
+
 | Component | Testing Approach | Tools |
 |-----------|------------------|-------|
 | **Agent Logic** | Unit tests for message handling | Pytest + Mock LLM responses |
@@ -283,6 +294,7 @@ CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
 | **E2E Workflow** | End-to-end agent handoffs | Pytest with orchestrated flow |
 
 ### 8.2 Mock LLM Testing
+
 ```python
 # For testing without API costs
 class MockLLMProvider:
@@ -306,6 +318,7 @@ class MockLLMProvider:
 | **Platform Storage Limits** | Medium | Medium | File cleanup, external storage hooks |
 
 ### 9.2 Scalability Considerations
+
 - **Message Volume**: JSONL files can handle ~10K messages before performance impact
 - **Concurrent Projects**: Current design supports 1 project; multi-tenancy requires session isolation
 - **Agent Parallelization**: Architecture ready for concurrent agent execution in future versions
@@ -313,18 +326,21 @@ class MockLLMProvider:
 ## 10. Implementation Phases
 
 ### 10.1 Phase 1: Core Infrastructure (Week 1-2)
+
 - [ ] Message bus and agent base classes
 - [ ] Basic UI with agent consoles
 - [ ] Single agent (Analyst) integration
 - [ ] File-based persistence
 
 ### 10.2 Phase 2: Agent Orchestration (Week 3-4)
+
 - [ ] All agent implementations
 - [ ] Sequential workflow execution
 - [ ] Conflict detection and escalation
 - [ ] Real-time UI updates
 
 ### 10.3 Phase 3: POC Refinement (Week 5-6)
+
 - [ ] End-to-end testing
 - [ ] UI/UX improvements
 - [ ] Performance optimization
@@ -335,6 +351,7 @@ class MockLLMProvider:
 Based on the architecture design, the following additions to the Product Specification Document are recommended:
 
 ### 11.1 New Technical Requirements
+
 ```markdown
 3.12 Conflict Resolution
 - Maximum 3 negotiation attempts between agents before human escalation
@@ -353,6 +370,7 @@ Based on the architecture design, the following additions to the Product Specifi
 ```
 
 ### 11.2 Updated Success Metrics
+
 ```markdown
 - Agent conflict resolution rate < 20% human escalation
 - Message processing latency < 2 seconds for real-time UI

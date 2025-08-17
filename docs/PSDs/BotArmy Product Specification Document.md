@@ -1,4 +1,5 @@
 BotArmy Product Specification Document
+
 1. Executive Summary
 BotArmy is an autonomous Product Generator that builds functional Proof-of-Concept (POC) web products by orchestrating multiple AI agents through the Software Development Life Cycle (SDLC). It aims to streamline product creation via agent collaboration, with human Product Owner oversight on complex decisions.
 
@@ -86,12 +87,12 @@ Product Owner will interact via UI input boxes for specifying requirements and r
 Basic automated testing coverage to validate core functionality during POC. Coverage will be expanded post-POC.
 
 4. User Stories
-ID	User Story	Acceptance Criteria
-US-1	As a Product Owner, I want to input high-level product ideas so that the system can generate POC products.	System accepts and translates input to specs.
-US-2	As an Analyst Agent, I want to clarify requirements with stakeholders so that ambiguities are minimized.	Analyst logs all clarifications and updates specs.
-US-3	As a Developer Agent, I want clear architecture specs so that I can implement functional code modules.	Developer outputs modular, tested code artifacts.
-US-4	As a Tester Agent, I want acceptance criteria to validate product quality so that bugs are detected early.	Tests cover all acceptance criteria with reports.
-US-5	As a Product Owner, I want to be notified of conflicts so I can resolve them and keep development moving.	Conflict notifications prompt timely decisions.
+ID User Story Acceptance Criteria
+US-1 As a Product Owner, I want to input high-level product ideas so that the system can generate POC products. System accepts and translates input to specs.
+US-2 As an Analyst Agent, I want to clarify requirements with stakeholders so that ambiguities are minimized. Analyst logs all clarifications and updates specs.
+US-3 As a Developer Agent, I want clear architecture specs so that I can implement functional code modules. Developer outputs modular, tested code artifacts.
+US-4 As a Tester Agent, I want acceptance criteria to validate product quality so that bugs are detected early. Tests cover all acceptance criteria with reports.
+US-5 As a Product Owner, I want to be notified of conflicts so I can resolve them and keep development moving. Conflict notifications prompt timely decisions.
 
 5. Success Metrics
 % reduction in manual POC product build time.
@@ -103,15 +104,14 @@ Accuracy of product to initial specification on first build.
 Stakeholder satisfaction scores on product quality and collaboration transparency.
 
 6. Open Questions — Resolved & Pending
-Question	Status	Notes
-Initial target web product types?	Resolved	Narrow-focus web apps, no e-commerce, blogs, or content generation.
-Frontend/backend defaults?	Resolved	Preference for React frontend, Python backend, JSON for data.
-Integration targets?	Resolved	Only agent communications and LLM API access for now.
-UI fidelity?	Resolved	Simple, functional, non-styled POCs with future iteration.
-Persistent data storage?	Resolved	Conversation logs, specs, decisions, and memory to be persisted.
-Deployment environment?	Resolved	Cloud labs (Colab) initially, option for on-prem later.
-Security and compliance?	Resolved	None initially, tighten later.
-Role-based access control?	Resolved	No.
-Product Owner interaction mode?	Resolved	UI input boxes.
-Automated testing coverage?	Resolved	Basic for POC, extensible later.
-
+Question Status Notes
+Initial target web product types? Resolved Narrow-focus web apps, no e-commerce, blogs, or content generation.
+Frontend/backend defaults? Resolved Preference for React frontend, Python backend, JSON for data.
+Integration targets? Resolved Only agent communications and LLM API access for now.
+UI fidelity? Resolved Simple, functional, non-styled POCs with future iteration.
+Persistent data storage? Resolved Conversation logs, specs, decisions, and memory to be persisted.
+Deployment environment? Resolved Cloud labs (Colab) initially, option for on-prem later.
+Security and compliance? Resolved None initially, tighten later.
+Role-based access control? Resolved No.
+Product Owner interaction mode? Resolved UI input boxes.
+Automated testing coverage? Resolved Basic for POC, extensible later.

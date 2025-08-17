@@ -15,7 +15,7 @@
 
 1. **Requirements Gathering**:
    - **Business Analyst**: Produces a Requirements Document and Use Cases that outline what the system should do.
-   
+
 2. **Design**:
    - **System Architect**: Creates Architecture Diagrams and Design Models that define the system's structure and components.
 

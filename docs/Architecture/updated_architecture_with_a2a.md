@@ -50,6 +50,7 @@ BotArmy is designed as a **Sequential Agent Orchestration System** with real-tim
 ```
 
 **A2A Data Flow Diagram** (Text-based, can be visualized in Draw.io):
+
 ```
 [Agent A] --> [A2A Message (AgentCard, Task)] --> [In-memory Queue]
     |                                              |
@@ -62,6 +63,7 @@ BotArmy is designed as a **Sequential Agent Orchestration System** with real-tim
 ## 2. Technology Stack
 
 ### 2.1 Primary Platform: **GitHub Codespaces** (Recommended)
+
 - **Rationale**: Free tier available, persistent storage, web-based, supports full-stack development, and suitable for artifact hosting with hyperlink-based downloads.
 - **Alternative**: Vercel (for production-ready artifact hosting and deployment).
 - **Fallback**: Replit (if GitHub Codespaces unavailable).
@@ -80,6 +82,7 @@ BotArmy is designed as a **Sequential Agent Orchestration System** with real-tim
 | **Testing** | Pytest + React Testing Library + Playwright | Comprehensive coverage for POC |
 
 ### 2.3 Updated File Structure
+
 ```
 botarmy/
 ├── frontend/                   # React UI
@@ -347,6 +350,7 @@ class ConflictResolver:
 ### 3.4 Agent Communication Protocol
 
 **Sequential Workflow with A2A**:
+
 1. **Analyst** → Requirements Document → **Architect** (via A2A `task_handoff` with Agent Card check)
 2. **Architect** → Technical Specs → **Developer** (via A2A `task_handoff`)
 3. **Developer** → Code Artifacts → **Tester** (via A2A `artifact` message)
@@ -357,6 +361,7 @@ class ConflictResolver:
 8. **Agent Discovery** → Agents query capabilities via A2A `capability_discovery` before hand-offs
 
 **Conflict Resolution Protocol**:
+
 1. Agent A sends message to Agent B via A2A in-memory queue.
 2. Real-time status updates broadcast to UI via WebSocket.
 3. Agent B responds with agreement/disagreement + confidence score.
@@ -1107,6 +1112,7 @@ class PerformanceManager:
 ## 12. Implementation Phases
 
 ### 12.1 Phase 1: Core Infrastructure (Week 1-2)
+
 - [x] **Backend Foundation**
   - [x] FastAPI server with WebSocket support
   - [x] Pydantic models for all data structures
@@ -1125,6 +1131,7 @@ class PerformanceManager:
   - [x] Basic error handling
 
 ### 12.2 Phase 2: Agent Orchestration (Week 3-4)
+
 - [ ] **Multi-Agent System**
   - [ ] All agent implementations
   - [ ] Sequential workflow execution with A2A
@@ -1152,6 +1159,7 @@ class PerformanceManager:
   - [ ] JSONL queue logging for A2A messages
 
 ### 12.3 Phase 3: POC Refinement (Week 5-6)
+
 - [ ] **Testing & Quality**
   - [ ] Comprehensive unit test suite
   - [ ] Integration tests for agent workflows
