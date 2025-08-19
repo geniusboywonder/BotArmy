@@ -406,4 +406,8 @@ JSONL Logs → JSON Specs → IndexedDB Cache → Real-time UI → Notifications
   - Enterprise security and compliance features
   - Artifact previews for Markdown, images, and PDFs
 
+Ideally what I want is the Human in loop to be in control throughout the process and to be able to direct the next step of the workflow or get each agent to pause their tasks. This should happen via conversation in the chat window, whereby the agents explain what they are doing and ask for permission to proceed before doing do. A "pause button" in each of the agent boxes would also be useful.
+
+In addition the system should be aware of the rate limits of using OpenAI and not exceed these at any time.
+
 This enhanced Product Specification Document provides a comprehensive foundation for the BotArmy POC development, incorporating all architectural decisions, detailed requirements for frontend and backend implementation, and updated UI and functionality based on the mockup.
